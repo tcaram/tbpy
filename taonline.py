@@ -19,18 +19,14 @@ from __future__ import print_function
 
 from TurtleArt.tapalette import make_palette
 from TurtleArt.taprimitive import Primitive, ArgSlot
-from TurtleArt.tatype import TYPE_FLOAT
+from TurtleArt.tatype import TYPE_CHAR, TYPE_STRING, TYPE_INT, TYPE_FLOAT ,TYPE_BOOL
 
 from gettext import gettext as _
 
 from plugins.plugin import Plugin
 
-from pydoc import locate
-
 import re
 import os
-import sys
-import glob
 import inspect
 import importlib
 
@@ -53,7 +49,7 @@ class Taonline(Plugin):
         # print(self.modules)
 
     def parse_docstring(self, func):
-        req_metadata = ["Label", "Description", "Params", "Example"]
+        req_metadata = ["Label", "Description", "Params", "Example", "Colors"]
         doc = func.__doc__
 
         metadata = {}
@@ -64,11 +60,54 @@ class Taonline(Plugin):
                 metadata[met] = res[0]
         return metadata
 
-    def parse_param(self, params):
+
+    def parse_params(self, params):
+        _params = []
         params_list = params.split(", ")
         params_tuple = [tuple(p.split(" ")) for p in params_list]
         for ptype, pname in params_tuple:
-            t = locate(ptype)
+            _params.append((pname, self.builtin_to_tatype(ptype)))
+            # print(ptype, self.builtin_to_tatype(ptype), pname)
+        return _params
+
+    def builtin_to_tatype(self, x):
+        """ Return the tatype.Type representation of a given built-in type. """
+
+        d = {
+            "chr": TYPE_CHAR,
+            "char": TYPE_CHAR,
+
+            "string": TYPE_STRING,
+            "str": TYPE_STRING,
+
+            "integer": TYPE_INT,
+            "int": TYPE_INT,
+
+            "bool": TYPE_BOOL,
+            "boolean": TYPE_BOOL,
+
+            "long": TYPE_INT,
+            "float": TYPE_FLOAT,
+            "complex": False,
+        }
+
+        return d[x]
+
+    def parse_example(self, x):
+        args = x.split(",")
+        if len(args) > 1: # return params as a list
+            return args
+        else: # one or zero params
+            return x
+
+    def params_to_labels(self, params):
+        return [label for label, _ in params]
+
+    def params_to_argslot(self, params):
+        return [ArgSlot(tatype) for _, tatype in params]
+
+    def parse_color(self, x):
+        return x.split(",")
 
     def setup(self):
         self.load_modules()
@@ -80,25 +119,42 @@ class Taonline(Plugin):
             for name, func in funcs:
                 if (not name.startswith("_")):
                     metadata = self.parse_docstring(func)
-                    # print(metadata)
+                    print(metadata)
+
+                    if not 'Label' in metadata:
+                        raise Exception("Label configuration is required.")
+
+                    if not 'Params' in metadata:
+                        raise Exception("Params configuration is required.")
+
+                    # required config
                     mod_label = metadata['Label']
-                    mod_descr = metadata['Description']
-                    mod_params = metadata['Params']
-                    mod_example = metadata['Example']
-                    # self.parse_param(mod_params)
+                    mod_params = self.parse_params(metadata['Params'])
 
-                    param_count = len(mod_params.split(","))
+                    # optional config
+                    mod_descr = None
+                    if 'Description' in metadata:
+                        mod_descr = metadata['Description']
+                    
+                    mod_example = None
+                    if 'Example' in metadata:
+                        mod_example = self.parse_example(metadata['Example'])
+                    
+                    mod_color = None
+                    if 'Colors' in metadata:
+                        mod_color = self.parse_color(metadata['Colors'])
+                        if len(mod_color) != 2:
+                            raise Exception("Colors config syntax is #background,#border, i.e: #ff0000, #bb0000")
 
-                    if not (param_count in [1, 2, 3, 7]):
+                    if not (len(mod_params) in [1, 2, 3, 7]):
                         raise Exception("Currently only one, two, three or seven parameters parameters are supported.")
 
-                    style = 'basic-style-' + str(param_count) + 'arg'
-
                     self.palette.add_block(mod_label, 
-                        style=style,
-                        label=[mod_label, 'lat', 'long'],
+                        style='basic-style-' + str(len(mod_params)) + 'arg',
+                        label=[mod_label] + self.params_to_labels(mod_params),
                         prim_name=mod_label,
-                        default=[-34.921, -56.159],
-                        help_string=mod_descr)
+                        default=mod_example,
+                        help_string=mod_descr,
+                        colors=mod_color)
 
-                    self.tw.lc.def_prim(mod_label, param_count, Primitive(func, arg_descs=[ArgSlot(TYPE_FLOAT), ArgSlot(TYPE_FLOAT)]))
+                    self.tw.lc.def_prim(mod_label, len(mod_params), Primitive(func, arg_descs=self.params_to_argslot(mod_params)))
