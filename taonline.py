@@ -19,7 +19,7 @@ from __future__ import print_function
 
 from TurtleArt.tapalette import make_palette
 from TurtleArt.taprimitive import Primitive, ArgSlot
-from TurtleArt.tatype import TYPE_CHAR, TYPE_STRING, TYPE_INT, TYPE_FLOAT ,TYPE_BOOL
+from TurtleArt.tatype import TYPE_CHAR, TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_BOOL
 
 from gettext import gettext as _
 
@@ -29,6 +29,7 @@ import re
 import os
 import inspect
 import importlib
+
 
 class Taonline(Plugin):
     def __init__(self, parent):
@@ -42,8 +43,8 @@ class Taonline(Plugin):
     def load_modules(self):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         for file in os.listdir(os.path.join(dir_path, "blocks")):
-            if not file.startswith('_') and file.endswith(".py"):
-                module_name = "plugins.taonline.blocks." + file.replace('.py', '')
+            if not file.startswith("_") and file.endswith(".py"):
+                module_name = "plugins.taonline.blocks." + file.replace(".py", "")
                 self.modules.append(importlib.import_module(module_name))
                 self.log("Succesfuly imported %s" % (module_name))
         # print(self.modules)
@@ -56,10 +57,9 @@ class Taonline(Plugin):
         for met in req_metadata:
             reg = r"(?<=" + met + r"\()(.*)(?=\))"
             res = re.findall(reg, doc)
-            if (len(res) != 0):
+            if len(res) != 0:
                 metadata[met] = res[0]
         return metadata
-
 
     def parse_params(self, params):
         _params = []
@@ -71,21 +71,17 @@ class Taonline(Plugin):
         return _params
 
     def builtin_to_tatype(self, x):
-        """ Return the tatype.Type representation of a given built-in type. """
+        """Return the tatype.Type representation of a given built-in type."""
 
         d = {
             "chr": TYPE_CHAR,
             "char": TYPE_CHAR,
-
             "string": TYPE_STRING,
             "str": TYPE_STRING,
-
             "integer": TYPE_INT,
             "int": TYPE_INT,
-
             "bool": TYPE_BOOL,
             "boolean": TYPE_BOOL,
-
             "long": TYPE_INT,
             "float": TYPE_FLOAT,
             "complex": False,
@@ -95,9 +91,9 @@ class Taonline(Plugin):
 
     def parse_example(self, x):
         args = x.split(",")
-        if len(args) > 1: # return params as a list
+        if len(args) > 1:  # return params as a list
             return args
-        else: # one or zero params
+        else:  # one or zero params
             return x
 
     def params_to_labels(self, params):
@@ -111,50 +107,65 @@ class Taonline(Plugin):
 
     def setup(self):
         self.load_modules()
-        self.palette = make_palette('taonline', ["#00FF00","#008000"], _('TurtleBots Online'), translation=_('taonline'))
+        self.palette = make_palette(
+            "taonline",
+            ["#00FF00", "#008000"],
+            _("TurtleBots Online"),
+            translation=_("taonline"),
+        )
         for module in self.modules:
             # fetch module metadata
-            mod_name = module.MODULE_NAME
+            # mod_name = module.MODULE_NAME
             funcs = inspect.getmembers(module, inspect.isfunction)
             for name, func in funcs:
-                if (not name.startswith("_")):
+                if not name.startswith("_"):
                     metadata = self.parse_docstring(func)
                     print(metadata)
 
-                    if not 'Label' in metadata:
+                    if "Label" not in metadata:
                         raise Exception("Label configuration is required.")
 
-                    if not 'Params' in metadata:
+                    if "Params" not in metadata:
                         raise Exception("Params configuration is required.")
 
                     # required config
-                    mod_label = metadata['Label']
-                    mod_params = self.parse_params(metadata['Params'])
+                    mod_label = metadata["Label"]
+                    mod_params = self.parse_params(metadata["Params"])
 
                     # optional config
                     mod_descr = None
-                    if 'Description' in metadata:
-                        mod_descr = metadata['Description']
-                    
+                    if "Description" in metadata:
+                        mod_descr = metadata["Description"]
+
                     mod_example = None
-                    if 'Example' in metadata:
-                        mod_example = self.parse_example(metadata['Example'])
-                    
+                    if "Example" in metadata:
+                        mod_example = self.parse_example(metadata["Example"])
+
                     mod_color = None
-                    if 'Colors' in metadata:
-                        mod_color = self.parse_color(metadata['Colors'])
+                    if "Colors" in metadata:
+                        mod_color = self.parse_color(metadata["Colors"])
                         if len(mod_color) != 2:
-                            raise Exception("Colors config syntax is #background,#border, i.e: #ff0000, #bb0000")
+                            raise Exception(
+                                "Colors config syntax is #background,#border, i.e: #ff0000, #bb0000"
+                            )
 
                     if not (len(mod_params) in [1, 2, 3, 7]):
-                        raise Exception("Currently only one, two, three or seven parameters parameters are supported.")
+                        raise Exception(
+                            "Currently only one, two, three or seven parameters parameters are supported."
+                        )
 
-                    self.palette.add_block(mod_label, 
-                        style='basic-style-' + str(len(mod_params)) + 'arg',
+                    self.palette.add_block(
+                        mod_label,
+                        style="basic-style-" + str(len(mod_params)) + "arg",
                         label=[mod_label] + self.params_to_labels(mod_params),
                         prim_name=mod_label,
                         default=mod_example,
                         help_string=mod_descr,
-                        colors=mod_color)
+                        colors=mod_color,
+                    )
 
-                    self.tw.lc.def_prim(mod_label, len(mod_params), Primitive(func, arg_descs=self.params_to_argslot(mod_params)))
+                    self.tw.lc.def_prim(
+                        mod_label,
+                        len(mod_params),
+                        Primitive(func, arg_descs=self.params_to_argslot(mod_params)),
+                    )
