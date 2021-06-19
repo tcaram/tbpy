@@ -5,6 +5,7 @@ MODULE_NAME = "twitter"
 MODULE_AUTHOR = "Tomas Caram <tcaramm@gmail.com>"
 MODULE_VERSION = 0.1
 
+
 def _make_request(text):
     APP_KEY = "uJjauAXgUwWQ6YuqPAUNRr8g7"
     APP_SECRET = "hXBi8cBmzOfV0S9pNfF4gmkbtuxFbAPKsJYdijQkniQeh3TNxl"
@@ -18,9 +19,7 @@ def _make_request(text):
         "https://api.twitter.com/1.1/statuses/update.json", auth=auth, params=params
     )
 
-    print(r.json())
-    return r.json()
-
+    return r
 
 def send_tweet(text):
     """
@@ -32,4 +31,4 @@ def send_tweet(text):
     """
 
     r = _make_request(text)
-    return 1
+    return r.status_code == 200

@@ -5,6 +5,7 @@ MODULE_NAME = "weather"
 MODULE_AUTHOR = "Tomas Caram <tcaramm@gmail.com>"
 MODULE_VERSION = 0.1
 
+
 def __call_api(lat, lon):
     API_KEY = "d62fa22e64580ff65cc374ca8e791be3"
     lang = "es"
@@ -35,9 +36,9 @@ def get_weather(lat, lon):
     """
     @Label(get_weather)
     @Description(Get weather in a given location)
-    @Params(float lat, float lon)
+    @Parameters(float lat, float lon)
     @Example(-34.921, -56.159)
-    @Colors(#ff0000, #bb0000)
+    @Color(#ff0000)
     """
     res = __call_api(lat, lon)
     cweather = res["current"]["weather"][0]
