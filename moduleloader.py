@@ -30,14 +30,22 @@ class ModuleLoader:
         return self.__loaded
 
     def __load(self):
+<<<<<<< HEAD
         dir_path = os.path.join(self.__path, "modules")
+=======
+        dir_path = os.path.join(self.__path, "functions")
+>>>>>>> e4b4729534963bf9d9ba2cd5a992562184b8d20d
         for file in os.listdir(dir_path):
             if self.__is_module_file(file):
                 module = Module(self.__construct_name(file))
                 self.__loaded.append(module)
 
     def __construct_name(self, file):
+<<<<<<< HEAD
         return "plugins.taonline.modules." + self.__sanitize_name(file)
+=======
+        return "plugins.taonline.functions." + self.__sanitize_name(file)
+>>>>>>> e4b4729534963bf9d9ba2cd5a992562184b8d20d
 
     def __sanitize_name(self, file):
         return file.replace(".py", "")
