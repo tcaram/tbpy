@@ -20,19 +20,13 @@ from __future__ import print_function
 from TurtleArt.tapalette import make_palette
 from TurtleArt.taprimitive import Primitive
 
-from gettext import gettext as _
-
 from plugins.plugin import Plugin
 
-# import re
-import os
-
-# import importlib
-
-# from taonline.module import Module
-# from taonline.function import Function
 from .moduleloader import ModuleLoader
 
+from TurtleArt.tatype import TYPE_CHAR, TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_BOOL
+
+import os
 
 class Taonline(Plugin):
     def __init__(self, parent):
@@ -45,8 +39,8 @@ class Taonline(Plugin):
         self.palette = make_palette(
             "taonline",
             ["#00FF00", "#008000"],
-            _("TurtleBots Online"),
-            translation=_("taonline"),
+            "TurtleBots Online",
+            translation="taonline",
         )
 
         for module in self.loader.get_loaded_modules():
@@ -54,7 +48,7 @@ class Taonline(Plugin):
                 self.palette.add_block(
                     func.get_label(),
                     style=func.get_style(),
-                    label=[func.get_label()] + func.get_parameters(),
+                    label=[func.get_label()] + func.get_parameters_labels(),
                     prim_name=func.get_label(),
                     default=func.get_example(),
                     help_string=func.get_description(),
@@ -63,11 +57,11 @@ class Taonline(Plugin):
 
                 self.tw.lc.def_prim(
                     func.get_label(),
-                    func.get_parameters().__len__,
+                    len(func.get_parameters()),
                     Primitive(
                         func.get_function(),
-                        arg_descs=func.params_to_argslot(),
-                        return_type=func.get_ret_type(),
+                        return_type=TYPE_INT,
+                        arg_descs=func.get_parameters_as_argslot(),
                     ),
                 )
 

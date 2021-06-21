@@ -19,9 +19,8 @@ from TurtleArt.taprimitive import ArgSlot
 
 import re
 
-
 class Function:
-    REQUIRED_CONFIG = ("Label", "Parameters")
+    REQUIRED_CONFIG = ("Label", "Parameters", "Return")
 
     def __init__(self, name, function):
         self.name = name
@@ -47,51 +46,26 @@ class Function:
         self.__parse_example()
         self.__parse_color()
 
-    def get_function(self):
-        return self.function
-
-    def params_to_argslot(self):
-        return [ArgSlot(tatype) for _, tatype in self.params]
-
-    def get_label(self):
-        return self.metadata["Label"]
-
-    def get_description(self):
-        return self.metadata["Description"]
-
-    def get_parameters(self):
-        return self.params
-
-    def get_ret_type(self):
-        return self.ret_type
-
-    def get_example(self):
-        return self.example
-
-    def get_color(self):
-        return self.color
-
-    def get_style(self):
-        return "basic-style-" + str(len(self.params)) + "arg"
-
-    def __parse_docstring(self):
-        pattern = r"@(\w.+)\((?<=\()(.*)(?=\))"
-        for (key, val) in re.findall(pattern, self.docs):
-            self.metadata[key] = val
-
     def __check_required_config(self):
         """Return true iff all of the required config (self.REQUIRED_CONFIG) is already
         loaded into self.metadata"""
         return all(conf in self.metadata for conf in self.REQUIRED_CONFIG)
 
+    # Parsers
+    def __parse_docstring(self):
+        pattern = r"@(\w.+)\((?<=\()(.*)(?=\))"
+        for (key, val) in re.findall(pattern, self.docs):
+            self.metadata[key] = val
+
     def __parse_parameters(self):
-        params_list = self.metadata["Parameters"].split(", ")
-        params_tuple = [tuple(p.split(" ")) for p in params_list]
-        for ptype, pname in params_tuple:
-            self.params.append((pname, self.__builtin_to_tatype(ptype)))
+        if self.metadata["Parameters"] is not "":
+            params_list = self.metadata["Parameters"].split(", ")
+            params_tuple = [tuple(p.split(" ")) for p in params_list]
+            for ptype, pname in params_tuple:
+                self.params.append((pname, self.__builtin_to_tatype(ptype)))
 
     def __parse_ret_type(self):
-        pass
+        self.ret_type = self.__builtin_to_tatype(self.metadata["Return"])
 
     def __parse_example(self):
         if "Example" in self.metadata:
@@ -102,7 +76,6 @@ class Function:
                 self.example = self.metadata["Example"]
 
     def __parse_color(self):
-        print("Parseando color", self.metadata["Color"])
         if self.__is_valid_hexadecimal_color(self.metadata["Color"]):
             self.color = [
                 self.metadata["Color"],
@@ -111,6 +84,7 @@ class Function:
         else:
             self.color = ["#bb0000", "#ff0000"]
 
+    # Utils 
     def __builtin_to_tatype(self, x):
         d = {
             "chr": TYPE_CHAR,
@@ -124,6 +98,7 @@ class Function:
             "long": TYPE_INT,
             "float": TYPE_FLOAT,
             "complex": False,
+            "none": None
         }
 
         return d[x]
@@ -151,6 +126,47 @@ class Function:
             new_rgb_int[1],
             new_rgb_int[2],
         )  # convert back to hexadecimal
+
+    # Getters 
+    def get_function(self):
+        return self.function
+
+    def get_label(self):
+        return self.metadata["Label"]
+
+    def get_description(self):
+        return self.metadata["Description"]
+
+    def get_parameters(self):
+        return self.params
+
+    def get_parameters_as_argslot(self):
+        return [ArgSlot(tatype) for _, tatype in self.params]
+
+    def get_parameters_labels(self):
+        return [name for name, _ in self.params]
+
+    def get_ret_type(self):
+        return self.ret_type
+
+    def get_example(self):
+        return self.example
+
+    def get_color(self):
+        return self.color
+
+    def get_style(self):
+        if len(self.params) == 0:
+            return 'box-style'
+
+        if self.ret_type == TYPE_BOOL:
+            return "boolean-block-style"
+        elif self.ret_type in [TYPE_INT, TYPE_FLOAT]:
+            return "number-style"
+        elif self.ret_type in [TYPE_CHAR, TYPE_STRING]:
+            return "number-style"
+
+        return "basic-style-" + str(len(self.params)) + "arg"
 
     def get_doc(self, key):
         return self.metadata[key]
