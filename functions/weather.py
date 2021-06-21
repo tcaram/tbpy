@@ -27,6 +27,7 @@ def get_temperature(lat, lon):
     @Parameters(float lat, float lon)
     @Example(-34.921, -56.159)
     @Color(#ff0000)
+    @Return(float)
     """
     res = __call_api(lat, lon)
     return res["current"]["temp"]
@@ -39,6 +40,7 @@ def get_weather(lat, lon):
     @Parameters(float lat, float lon)
     @Example(-34.921, -56.159)
     @Color(#ff0000)
+    @Return(string)
     """
     res = __call_api(lat, lon)
     cweather = res["current"]["weather"][0]

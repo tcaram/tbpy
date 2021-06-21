@@ -31,16 +31,13 @@ class Module:
             if not name.startswith("_")
         ]
 
-    @property
-    def name(self):
+    def get_name(self):
         return self.module["MODULE_NAME"]
 
-    @property
-    def author(self):
+    def get_author(self):
         return self.module["MODULE_AUTHOR"]
 
-    @property
-    def version(self):
+    def get_version(self):
         return self.module["MODULE_VERSION"]
 
     def get_primitive(self):
