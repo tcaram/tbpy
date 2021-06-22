@@ -37,7 +37,7 @@ class ModuleLoader:
                 self.__loaded.append(module)
 
     def __construct_name(self, file):
-        return "plugins.taonline.modules." + self.__sanitize_name(file)
+        return "plugins.tbpy.modules." + self.__sanitize_name(file)
 
     def __sanitize_name(self, file):
         return file.replace(".py", "")

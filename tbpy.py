@@ -28,7 +28,7 @@ from TurtleArt.tatype import TYPE_CHAR, TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_
 
 import os
 
-class Taonline(Plugin):
+class Tbpy(Plugin):
     def __init__(self, parent):
         Plugin.__init__(self)
         self.tw = parent
@@ -37,10 +37,10 @@ class Taonline(Plugin):
     def setup(self):
         self.loader = ModuleLoader(os.path.dirname(os.path.realpath(__file__)))
         self.palette = make_palette(
-            "taonline",
+            "tbpy",
             ["#00FF00", "#008000"],
             "TurtleBots Online",
-            translation="taonline",
+            translation="tbpy",
         )
 
         for module in self.loader.get_loaded_modules():
