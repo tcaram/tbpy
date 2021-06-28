@@ -20,25 +20,25 @@ import inspect
 import importlib
 
 
-class Module:
+class Group:
     def __init__(self, name):
-        self.__module = importlib.import_module(name)
+        self.__group = importlib.import_module(name)
 
     def get_functions(self):
         return [
             Function(name, func)
-            for name, func in inspect.getmembers(self.__module, inspect.isfunction)
+            for name, func in inspect.getmembers(self.__group, inspect.isfunction)
             if not name.startswith("_")
         ]
 
     def get_name(self):
-        return self.module["MODULE_NAME"]
+        return self.__group["GROUP_NAME"]
 
     def get_author(self):
-        return self.module["MODULE_AUTHOR"]
+        return self.__group["GROUP_AUTHOR"]
 
     def get_version(self):
-        return self.module["MODULE_VERSION"]
+        return self.__group["GROUP_VERSION"]
 
     def get_primitive(self):
-        return self.__module
+        return self.__group

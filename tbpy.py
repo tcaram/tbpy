@@ -22,7 +22,7 @@ from TurtleArt.taprimitive import Primitive
 
 from plugins.plugin import Plugin
 
-from .moduleloader import ModuleLoader
+from .grouploader import GroupLoader
 
 from TurtleArt.tatype import TYPE_CHAR, TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_BOOL
 
@@ -35,7 +35,7 @@ class Tbpy(Plugin):
         self.loader = None
 
     def setup(self):
-        self.loader = ModuleLoader(os.path.dirname(os.path.realpath(__file__)))
+        self.loader = GroupLoader(os.path.dirname(os.path.realpath(__file__)))
         self.palette = make_palette(
             "tbpy",
             ["#00FF00", "#008000"],
@@ -43,8 +43,8 @@ class Tbpy(Plugin):
             translation="tbpy",
         )
 
-        for module in self.loader.get_loaded_modules():
-            for func in module.get_functions():
+        for group in self.loader.get_loaded_groups():
+            for func in group.get_functions():
                 self.palette.add_block(
                     func.get_label(),
                     style=func.get_style(),
@@ -64,8 +64,3 @@ class Tbpy(Plugin):
                         arg_descs=func.get_parameters_as_argslot(),
                     ),
                 )
-
-            #     if not (len(mod_params) in [1, 2, 3, 7]):
-            #         raise Exception(
-            #             "Currently only one, two, three or seven parameters parameters are supported."
-            #         )

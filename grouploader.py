@@ -14,27 +14,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from .module import Module
+from .group import Group
 
 import os
 
 
-class ModuleLoader:
+class GroupLoader:
     def __init__(self, path):
         self.__path = path
         self.__loaded = []
 
         self.__load()
 
-    def get_loaded_modules(self):
+    def get_loaded_groups(self):
         return self.__loaded
 
     def __load(self):
         dir_path = os.path.join(self.__path, "groups")
         for file in os.listdir(dir_path):
-            if self.__is_module_file(file):
-                module = Module(self.__construct_name(file))
-                self.__loaded.append(module)
+            if self.__is_group_file(file):
+                group = Group(self.__construct_name(file))
+                self.__loaded.append(group)
 
     def __construct_name(self, file):
         return "plugins.tbpy.groups." + self.__sanitize_name(file)
@@ -42,5 +42,5 @@ class ModuleLoader:
     def __sanitize_name(self, file):
         return file.replace(".py", "")
 
-    def __is_module_file(self, file):
+    def __is_group_file(self, file):
         return not file.startswith("_") and file.endswith(".py")
