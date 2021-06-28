@@ -31,5 +31,5 @@ def get_iss_long():
     @Color(#00008b)
     @Return(float)
     """
-    res = _call_api(
+    res = _call_api()
     return float(res['iss_position']['longitude'])
