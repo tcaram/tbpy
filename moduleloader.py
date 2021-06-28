@@ -30,14 +30,14 @@ class ModuleLoader:
         return self.__loaded
 
     def __load(self):
-        dir_path = os.path.join(self.__path, "modules")
+        dir_path = os.path.join(self.__path, "groups")
         for file in os.listdir(dir_path):
             if self.__is_module_file(file):
                 module = Module(self.__construct_name(file))
                 self.__loaded.append(module)
 
     def __construct_name(self, file):
-        return "plugins.tbpy.modules." + self.__sanitize_name(file)
+        return "plugins.tbpy.groups." + self.__sanitize_name(file)
 
     def __sanitize_name(self, file):
         return file.replace(".py", "")
